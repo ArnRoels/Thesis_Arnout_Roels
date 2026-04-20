@@ -1,0 +1,73 @@
+{
+  "dataset": {
+    "metadata": {
+      "label_field": "Treatment",
+      "control_value": "no_sgRNA"
+    },
+    "images": {
+      "root_path": "inputs/images",
+      "channels": ["C1", "C2", "C3", "C4", "C5"],
+      "file_format": "tiff",
+      "bits": 16,
+      "width": 2720,
+      "height": 2720
+    },
+    "locations": {
+      "mode": "single_cells",
+      "files_place": "inputs/locations",
+      "file_format": "{Metadata_Well}-{Metadata_Site}-Nuclei.csv",
+      "box_size": 224,
+      "area_shape": "Nuclei",
+      "mask_objects": false
+    }
+  },
+  "prepare": {
+    "illumination_correction": {
+      "calculate": false,
+      "down_scale_factor": 4,
+      "median_filter_size": 24
+    },
+    "compression": {
+      "implement": false,
+      "scaling_factor": 1.0
+    }
+  },
+  "train": {
+    "partition": {
+      "targets": ["Treatment"],
+      "split_field": "Metadata_Plate",
+      "training": ["PLATE"],
+      "validation": ["PLATE"]
+    },
+    "model": {
+      "name": "efficientnet",
+      "crop_generator": "repeat_channel_crop_generator",
+      "augmentations": true,
+      "epochs": 10,
+      "initialization": "ImageNet",
+      "params": {
+        "learning_rate": 0.001,
+        "batch_size": 32,
+        "conv_blocks": 0,
+        "label_smoothing": 0.1
+      }
+    },
+    "sampling": {
+      "factor": 1.0,
+      "cache_size": 1000,
+      "workers": 4
+    },
+    "validation": {
+      "frequency": 1,
+      "frame": "val",
+      "sample_first_crops": false,
+      "batch_size": 32
+    }
+  },
+  "profile": {
+    "use_pretrained_input_size": 224,
+    "feature_layer": "avg_pool",
+    "checkpoint": "None",
+    "batch_size": 128
+  }
+}
